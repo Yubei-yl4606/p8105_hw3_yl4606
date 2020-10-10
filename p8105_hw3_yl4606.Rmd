@@ -104,6 +104,7 @@ accelerometer_df =
       ) %>%
     separate(minute, into = c("act", "minute"), sep = 9) %>%
     mutate(
+      minute = as.integer(minute),
       day = as.factor(day),
       day = fct_relevel(day, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")),
       weekday_vs_weekend = recode(day,
@@ -140,4 +141,25 @@ accelerometer_df %>%
 ```
 
 To be honest, I did not observe any trends except that the man is not active on Saturday of both week 4 and week 5.
+
+```{r}
+accelerometer_df %>%
+  ggplot(aes(x = factor(minute), y = activity, color = day)) +
+  geom_line(alpha = 0.6) +
+  scale_x_discrete(breaks = seq(0, 1440, by = 60)) +
+  xlab("minute in a day")
+```
+From the plot above, we can observe a low activity (<2500) period from midnight to 6 am, which could be resulted from sleep during the night. And an increase in activity around 11 am to noon is observed on Sunday. Moreover, a significant increase in activity from 8pm to 10pm is observed on Thursday and Friday. The highest amount of activity is on Wednesday night. The overall activity level is constant, which is below 2500 and above 1250, during the day time.
+
+### Problem 3
+
+
+```{r}
+data("ny_noaa")
+```
+
+```{r}
+
+
+```
 
