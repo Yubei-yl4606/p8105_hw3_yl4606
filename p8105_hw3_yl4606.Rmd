@@ -87,4 +87,40 @@ instacart %>%
 
 ### Porblem 2
 
+Load and tidy the data.
+```{r message=FALSE}
+accelerometer_df = 
+  read_csv(
+    "./Data/accel_data.csv"
+    ) %>% 
+  janitor::clean_names()
 
+accelerometer_df =
+  accelerometer_df %>% 
+      pivot_longer(
+        activity_1:activity_1440,
+        names_to = "minute",
+        values_to = "activity"
+      ) %>%
+    separate(minute, into = c("act", "minute"), sep = 9) %>%
+    mutate(
+      day = as.factor(day),
+      day = fct_relevel(day, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")),
+      weekday_vs_weekend = recode(day,
+        "Monday" = "weekday",
+        "Tueday" = "weekday",
+        "Wednesday" = "weekday",
+        "Thursday" = "weekday",
+        "Friday" = "weekday",
+        "Saturday" = "weekend",
+        "Sunday" = "weekend"
+      ))%>%
+    group_by(day_id) %>% 
+    arrange(day) %>% 
+    relocate(week, day, weekday_vs_weekend) %>% 
+    select(-c(act, day_id))
+
+accelerometer_df
+```
+
+The existing variables include `r names(accelerometer_df)`, and the size of dataset is `r nrow(accelerometer_df)` rows by `r ncol(accelerometer_df)` columns. Therefore, there are `r nrow(accelerometer_df)` observations.
