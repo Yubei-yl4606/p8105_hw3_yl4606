@@ -116,11 +116,28 @@ accelerometer_df =
         "Sunday" = "weekend"
       ))%>%
     group_by(day_id) %>% 
-    arrange(day) %>% 
+    arrange(week, day) %>% 
     relocate(week, day, weekday_vs_weekend) %>% 
-    select(-c(act, day_id))
+    ungroup() %>% 
+    select(week, day, weekday_vs_weekend, minute, activity)
 
 accelerometer_df
 ```
 
-The existing variables include `r names(accelerometer_df)`, and the size of dataset is `r nrow(accelerometer_df)` rows by `r ncol(accelerometer_df)` columns. Therefore, there are `r nrow(accelerometer_df)` observations.
+The existing variables include `r names(accelerometer_df)`, and the size of dataset is `r nrow(accelerometer_df)` rows by `r ncol(accelerometer_df)` columns. Therefore, there are `r nrow(accelerometer_df)` observations. The variable 'day_id' is removed because it can be replaced by combination of (week, day).
+
+
+```{r}
+accelerometer_df %>% 
+  group_by(week, day) %>% 
+  mutate(total_activity = sum(activity)) %>% 
+  distinct(week, day, total_activity) %>% 
+  pivot_wider(
+    names_from = day,
+    values_from = total_activity
+  ) %>% 
+  knitr::kable()
+```
+
+To be honest, I did not observe any trends except that the man is not active on Saturday of both week 4 and week 5.
+
