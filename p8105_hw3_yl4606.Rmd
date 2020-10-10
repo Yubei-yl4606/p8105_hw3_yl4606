@@ -149,17 +149,53 @@ accelerometer_df %>%
   scale_x_discrete(breaks = seq(0, 1440, by = 60)) +
   xlab("minute in a day")
 ```
+
 From the plot above, we can observe a low activity (<2500) period from midnight to 6 am, which could be resulted from sleep during the night. And an increase in activity around 11 am to noon is observed on Sunday. Moreover, a significant increase in activity from 8pm to 10pm is observed on Thursday and Friday. The highest amount of activity is on Wednesday night. The overall activity level is constant, which is below 2500 and above 1250, during the day time.
 
 ### Problem 3
 
+Load the data.
 
 ```{r}
 data("ny_noaa")
 ```
 
-```{r}
+The size of ny_noaa dataset is `r nrow(ny_noaa)` rows by `r ncol(ny_noaa)` columns. Key variables include date, prcp, snow, snwd, tmax and tmin. Therefore, both precipitation and snow depth are recorded for each day from `r min(ny_noaa$date)` to `r max(ny_noaa$date)`. Many values in tmin and tmax are missing, and some values in prcp, snow, snwd are missing.
 
-
+Tidy the data.
+```{r warning=FALSE}
+ny_noaa_df = 
+  ny_noaa %>% 
+  separate(date, into = c("year", "month", "day"), sep = '-') %>% 
+  mutate(
+    prcp = prcp/10,
+    tmax = as.numeric(tmax)/10,
+    tmin = as.numeric(tmin)/10
+  )
+  
+ny_noaa_df %>% 
+  drop_na(snow) %>% 
+  group_by(snow) %>% 
+  summarise(count = n()) %>% 
+  arrange(desc(count))
 ```
+
+After dropping NAs of snow column, the most commonly observed values are 0mm, 25mm and 13mm. 0mm is the most common value because most of the time in NY state during a year is not snowing except in winter. 
+
+```{r}
+ny_noaa_df %>% 
+  group_by(id, year, month) %>% 
+  filter(month == "01" | month == "07") %>% 
+  mutate(tmax = as.numeric(tmax)) %>% 
+  drop_na(tmax) %>% 
+  summarise(mean = mean(tmax)) %>% 
+  ggplot(aes(x = year, y =  mean, group = id, color = id)) +
+  geom_line(show.legend = FALSE, alpha = 0.6) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  ylab("mean_of_tmax") +
+  facet_grid(.~month)
+```
+
+Yes. Both temperature in January and July fluctuated every two or three years, so we can conclude that temperature from 1981 to 2010 was not constant over the years. For temperature in January, there was an extreme low temperature(around -13 C) in 1982, and temperature in 1994, 2003 and 2004 seems much lower than the rest of years. And there might be an overall increase, which is not significant, in January temperature.For temperature in July, there was an extreme low temperature(around 14C) in 1988. The increase from 2009 to 2010 is obvious compared to temperature difference of other year intervals. Moreover, the two temperatures in a same year do not have to be correlated. In other word, the lowest means of max temperature in January and July do not have to appear in the same year.
+
 
