@@ -182,7 +182,7 @@ ny_noaa_df %>%
 
 After dropping NAs of snow column, the most commonly observed values are 0mm, 25mm and 13mm. 0mm is the most common value because most of the time in NY state during a year is not snowing except in winter. 
 
-```{r}
+```{r warning = FALSE}
 ny_noaa_df %>% 
   group_by(id, year, month) %>% 
   filter(month == "01" | month == "07") %>% 
@@ -190,12 +190,31 @@ ny_noaa_df %>%
   drop_na(tmax) %>% 
   summarise(mean = mean(tmax)) %>% 
   ggplot(aes(x = year, y =  mean, group = id, color = id)) +
-  geom_line(show.legend = FALSE, alpha = 0.6) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  ylab("mean_of_tmax") +
-  facet_grid(.~month)
+    geom_line(show.legend = FALSE, alpha = 0.6) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+    ylab("mean_of_tmax") +
+    facet_grid(.~month)
 ```
 
-Yes. Both temperature in January and July fluctuated every two or three years, so we can conclude that temperature from 1981 to 2010 was not constant over the years. For temperature in January, there was an extreme low temperature(around -13 C) in 1982, and temperature in 1994, 2003 and 2004 seems much lower than the rest of years. And there might be an overall increase, which is not significant, in January temperature.For temperature in July, there was an extreme low temperature(around 14C) in 1988. The increase from 2009 to 2010 is obvious compared to temperature difference of other year intervals. Moreover, the two temperatures in a same year do not have to be correlated. In other word, the lowest means of max temperature in January and July do not have to appear in the same year.
+```{r warning = FALSE}
+g1 = 
+  ny_noaa_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_histogram(alpha = 0.6)
+```
+
+```{r}
+g2 =
+  ny_noaa_df %>% 
+  filter(snow<100 & snow>0) %>% 
+  ggplot(aes(x = year, y = snow)) +
+  geom_violin(alpha = 0.6) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+ggarrange(
+  g1, g2,
+  ncol = 2, nrow = 1
+)
+```
 
 
